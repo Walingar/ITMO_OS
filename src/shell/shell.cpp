@@ -12,16 +12,16 @@ void execute(char **argv) {
     int status;
     pid = fork();
     if (pid == 0) {
-        if (execve(argv[0], argv, NULL) < 0) {
-            perror("Error: execute command failed");
+        if (execvp(argv[0], argv) < 0) {
+            perror("ERROR. Execute command failed");
             exit(-1);
         }
     } else if (pid > 0) {
         if (waitpid(pid, &status, 0) == -1) {
-            perror("Error: caught error in execution");
+            perror("ERROR. Caught error in execution");
         };
     } else {
-        perror("Error: fork failed");
+        perror("ERROR. Fork failed");
     }
 }
 
@@ -30,7 +30,7 @@ std::vector<char *> parse_command(std::string &command) {
     char *char_command = strdup(command.c_str());
     new_argv.push_back(strtok(char_command, " "));
     char *parameter;
-    while ((parameter = strtok(NULL, " ")) != NULL) {
+    while ((parameter = strtok(NULL, " \t\r\n")) != NULL) {
         new_argv.push_back(parameter);
     }
     new_argv.push_back('\0');
