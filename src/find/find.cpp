@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <cerrno>
 #include <string>
+#include "../utils/execute.h"
 
 class PatternMatcher {
 private:
@@ -89,41 +90,22 @@ public:
 
 auto pattern = PatternMatcher();
 
-void execute(char **argv) {
-    pid_t pid;
-    int status;
-    pid = fork();
-    if (pid == 0) {
-        if (execvp(argv[0], argv) < 0) {
-            perror("ERROR. Execute command failed");
-            exit(-1);
-        }
-    } else if (pid > 0) {
-        if (waitpid(pid, &status, 0) == -1) {
-            perror("ERROR. Caught error in execution");
-        };
-    } else {
-        perror("ERROR. Fork failed");
-    }
-}
-
-void exec(char *pathName) {
+void exec(const char *pathName) {
     if (strcmp(pattern.get_func(), "") == 0) {
         printf("%s\n", pathName);
         return;
     }
-    char *argv[3] = {pattern.get_func(), pathName, '\0'};
+    char *argv[3] = {pattern.get_func(), (char *) pathName, '\0'};
     execute(argv);
 }
 
-void visiting(char *nameDir) {
-    struct dirent *entry = NULL;
+void visiting(const char *nameDir) {
     DIR *dir = opendir(nameDir);
-    char path_to_execute[260];
     if (dir == NULL) {
         perror("ERROR. When opening directory");
         return;
     }
+    struct dirent *entry = NULL;
 
     while ((entry = readdir(dir))) {
         struct stat info{};
@@ -131,18 +113,18 @@ void visiting(char *nameDir) {
             strcmp(entry->d_name, "..") == 0) {
             continue;
         }
-        strcpy(path_to_execute, nameDir);
-        strcat(path_to_execute, "/");
-        strcat(path_to_execute, entry->d_name);
-        if (stat(path_to_execute, &info) == 0) {
+        std::string path_to_execute = std::string(nameDir);
+        path_to_execute.append("/");
+        path_to_execute.append(entry->d_name);
+        if (stat(path_to_execute.data(), &info) == 0) {
             if (S_ISDIR(info.st_mode)) {
-                visiting(path_to_execute);
+                visiting(path_to_execute.data());
             } else if (S_ISREG(info.st_mode)) {
                 if (pattern.check_pattern(info.st_ino,
                                           info.st_nlink,
                                           info.st_size,
                                           std::string(entry->d_name))) {
-                    exec(path_to_execute);
+                    exec(path_to_execute.data());
                 }
             }
         } else {
@@ -160,7 +142,7 @@ void initPattern(int argc, char *argv[]) {
         }
 
         if (strcmp("-inum", argv[i]) == 0) {
-            pattern.set_inum(static_cast<ino_t>(atol(argv[i + 1])));
+            pattern.set_inum(atol(argv[i + 1]));
         } else if (strcmp("-name", argv[i]) == 0) {
             pattern.set_name(argv[i + 1]);
         } else if (strcmp("-size", argv[i]) == 0) {
@@ -174,10 +156,12 @@ void initPattern(int argc, char *argv[]) {
                 case '=':
                     pattern.set_typeSize(0);
                     break;
+                default:
+                    break;
             }
-            pattern.set_size(static_cast<off_t >(atol(argv[i + 1] + 1)));
+            pattern.set_size(atol(argv[i + 1] + 1));
         } else if (strcmp("-nlinks", argv[i]) == 0) {
-            pattern.set_nlink(static_cast<nlink_t>(atoi(argv[i + 1])));
+            pattern.set_nlink(atoi(argv[i + 1]));
         } else if (strcmp("-exec", argv[i]) == 0) {
             pattern.set_exec(argv[i + 1]);
         } else {
