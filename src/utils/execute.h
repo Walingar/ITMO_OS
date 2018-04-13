@@ -1,9 +1,9 @@
 #pragma once
 
 #include <cstdio>
-#include <zconf.h>
 #include <cstdlib>
 #include <wait.h>
+#include <unistd.h>
 
 void execute(char **argv) {
     pid_t pid;

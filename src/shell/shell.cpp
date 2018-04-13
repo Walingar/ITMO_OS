@@ -1,6 +1,5 @@
 #include <string>
 #include <iostream>
-#include <zconf.h>
 #include <wait.h>
 #include <cstring>
 #include <vector>
