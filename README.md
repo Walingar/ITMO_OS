@@ -3,6 +3,22 @@ Tests and problems were taken from [ITMO OS site's](http://neerc.ifmo.ru/~os/hw.
 
 Текущие баллы: [баллы](https://docs.google.com/spreadsheets/d/1KqgTg7TLDLA2WZOVgANORlfEUPdYo-076Pb6dIe-Bo4/edit#gid=0&range=A15)
 
+## Домашнее задание 3. JIT compiler
+
+Условие:
+  1. Необходимо написать кусочек JIT компилятора.
+  2. Последовательность действий:
+     * Выделить память с помощью mmap(2)
+     * Записать в выделенную память машинный код, соответсвующий какой-либо 
+       функции
+     * Изменить права на выделенную память - чтение и исполнение. 
+       See: mprotect(2)
+     * Вызвать функцию по указателю на выделенную память
+     * Освободить выделенную память
+     
+Решение:
+* [JITCompiler](src/jitcompiler)
+
 ## Домашнее задание 2. Find
 
 Условие:
