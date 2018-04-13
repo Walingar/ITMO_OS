@@ -7,3 +7,4 @@ set(UTILS src/utils/execute.h)
 
 add_executable(HW1 src/shell/shell.cpp ${UTILS})
 add_executable(HW2 src/find/find.cpp ${UTILS})
+add_executable(HW3 src/jitcompiler/compiler.cpp)
