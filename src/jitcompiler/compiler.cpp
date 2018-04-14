@@ -61,7 +61,7 @@ void runtime_change_code(void *memory, char x) {
     memcpy(to_change, &x, 1);
 }
 
-std::pair<char, char> parse_command(std::string &command) {
+std::pair<char, char> get_parameters(std::string &command) {
     std::istringstream iss(command);
     int x, y;
     iss >> x >> y;
@@ -71,18 +71,20 @@ std::pair<char, char> parse_command(std::string &command) {
 int main() {
     void *memory = alloc_writable_memory(SIZE);
     emit_code_into_memory(memory);
+
     std::string command;
     while (std::getline(std::cin, command)) {
         if (command == "exit")
             break;
-        auto new_command = parse_command(command);
-        char x = new_command.first;
-        char y = new_command.second;
+        auto parameters = get_parameters(command);
+        char x = parameters.first;
+        char y = parameters.second;
 
         runtime_change_code(memory, x);
         char result = execute_function(memory, y);
         printf("result = %d\n", result);
     }
+
     free_memory(memory, SIZE);
     return 0;
 }
