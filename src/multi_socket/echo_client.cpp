@@ -8,7 +8,7 @@
 #include <iostream>
 #include <sys/epoll.h>
 
-#define BUFSIZE 6000
+#define BUFSIZE 1024
 #define EPOLL_SIZE 1000
 #define EPOLL_RUN_TIMEOUT -1
 #define PIPE_SIZE 2
