@@ -63,11 +63,12 @@ inline const char *registerToString(int reg) {
             return "REG_UNKNOWN";
     }
 }
+
 static jmp_buf jbuf;
 
 void handler_sigsegv_address(int signum, siginfo_t *siginfo, void *context) {
     if (siginfo->si_signo == SIGSEGV) {
-        longjmp(jbuf, 1);
+        siglongjmp(jbuf, 1);
     }
 }
 
@@ -77,11 +78,12 @@ void address_dump(long long address) {
     sigaddset(&signal_set, SIGSEGV);
     sigprocmask(SIG_UNBLOCK, &signal_set, NULL);
 
-    struct sigaction act, old_act;
+
+    struct sigaction act;
     memset(&act, 0, sizeof(act));
     act.sa_sigaction = handler_sigsegv_address;
     act.sa_flags = SA_SIGINFO;
-    if (sigaction(SIGSEGV, &act, &old_act) < 0) {
+    if (sigaction(SIGSEGV, &act, NULL) < 0) {
         perror("sigaction");
         exit(-1);
     }
@@ -89,14 +91,14 @@ void address_dump(long long address) {
     if (setjmp(jbuf) == 0) {
         printf("ADDRESS_0x%-10p\t%x\n", reinterpret_cast<void *>(address), int(p[0]));
     } else {
-        printf("ADDRESS_0x%-10p\t(bad)\n",  reinterpret_cast<void *>(address));
+        printf("ADDRESS_0x%-10p\t(bad)\n", reinterpret_cast<void *>(address));
     }
 }
 
 void memory_dump(void *address) {
     printf("MEMORY DUMP\n");
-    long long from = std::max((long long) 0, (long long) ((char*)address - 20 * sizeof(char)));
-    long long to = std::min(LONG_LONG_MAX, (long long) ((char*)address + 20 * (sizeof(char))));
+    long long from = std::max((long long) 0, (long long) ((char *) address - 20 * sizeof(char)));
+    long long to = std::min(LONG_LONG_MAX, (long long) ((char *) address + 20 * (sizeof(char))));
     for (long long i = from; i < to; i += sizeof(char)) {
         address_dump(i);
     }
@@ -151,6 +153,6 @@ int main(int argc, char **argv) {
     }
     fall1();
     // uncomment it to see bad addresses in dump and comment previous one
-    //fall2();
+    // fall2();
     return 0;
 }
